@@ -120,50 +120,86 @@ void IOCP_Server::StopSvr()
 }
 
 // 클라이언트 연결 수락 메서드
+void IOCP_Server::AcceptConnections()
+{
+	while (true)
+	{
+		SOCKET clientSocket = accept(listenSocket, NULL, NULL);
+
+		if (clientSocket == INVALID_SOCKET)
+		{
+			cerr << "ERROR : 클라이언트 연결 실패되었습니다." << endl;
+			continue;
+		}
+
+		// 비동기 I/O를 위한 Overlapped 구조체 할당 및 초기화
+		OVERLAPPED* overlapped = new OVERLAPPED;
+		ZeroMemory(overlapped, sizeof(OVERLAPPED));
+
+		// 클라이언트 소켓을 IOCP와 연계 (IOCP CRAETE)
+		CreateIoCompletionPort((HANDLE)clientSocket, iocpHandle, (ULONG_PTR)clientSocket, 0);
+	
+		// 클라이언트 요청 읽기
+		// 클라이언트 생성 후 다시 작성
+	}
+}
 
 // 클라이언트 요청 처리 메서드
 
 // 워커 스레드 메서드
-
-int main()
+DWORD WINAPI IOCP_Server::WorkerThread(LPVOID lpParam)
 {
-	
-	
-	
+	// 서버 인스턴스 가져오기, lpparam으로 서버 인스턴스 전달 받음
+	IOCP_Server* server = (IOCP_Server*)lpParam;
+	DWORD bytesTransferred;
+	ULONG_PTR completionKey;
+	OVERLAPPED* overlapped;
 
-	// 4. 클라이언트 접속 처리 및 대응
-	SOCKADDR_IN clientaddr = { 0 };
-	int nAddrLen = sizeof(clientaddr);
-	SOCKET hClient = 0;
-	char szBuffer[128] = { 0 };
-	int nReceive = 0;
-
-	// 4.1 클라이언트 연결을 받아들이고 새로운 소켓 생성(개방) 어셉트
-	while ((hClient = ::accept(hSocket, (SOCKADDR*)&clientaddr, &nAddrLen)) != INVALID_SOCKET)
+	// 무한루프 : 서버가 종료될 때까지 계속 대기
+	while (true)
 	{
-		cout << " 새 클라이언트가 연결되었습니다. " << endl;
+		// 1. IOCP 큐에서 완료된 작업을 기다린다. GQCS()
+		BOOL result = GetQueuedCompletionStatus(
+			server->iocpHandle, // IOCP 핸들, 핸들에서 대기 중인 작업이 완료되면 반환
+			&bytesTransferred, // 전송된 바이트 수
+			&completionKey, // 완료키 (소켓핸들), 키 호출 시 등록된 소켓핸들이 전달됨
+			&overlapped, // 비동기 작업에 사용된 OVERLAPPED 구조체
+			INFINITE // 무한대기, 작업 완료될 때까지 스레드 대기상태
+		);
 
-		// 4.2 클라이언트로부터 문자열을 수신함
-		while ((nReceive = ::recv(hClient, szBuffer, sizeof(szBuffer), 0)))
+		// 2. GQCS의 결과가 실패했을 경우 처리
+		// overlapped 포인터가 NULL이 아닐 경우, 비동기 작업 리소스를 해제하여 메모리 누수 방지
+		if (!result)
 		{
-			// 4.3 수신한 문자열을 그대로 반향전송
-			::send(hClient, szBuffer, sizeof(szBuffer), 0);
-			cout << szBuffer;
-			memset(szBuffer, 0, sizeof(szBuffer));
+			if (overlapped)
+			{
+				cerr << "ERROR : GQCS 실패" << GetLastError() << endl;
+				delete overlapped;
+			}
+			continue; // 루프 다시 시작 다음 작업 처리 준비
 		}
 
-		// 4.4 클라이언트가 연결을 종료함
-		::shutdown(hClient, SD_BOTH);
-		::closesocket(hClient);
-		cout << "클라이언트 연결이 끊겼습니다" << endl;
+		// 3. completionKey 클라이언트 소켓 핸들 (iocp 큐에 등록 된 클라이언트 소켓 핸들)
+		// 이 핸들을 통해 어떤 클라이언트와 작업이 완료되었는지 확인
+		// 유효한 클라이언트 소켓이면, 클라이언트 요청 처리를 위해 handleclientrequest 메서드 호출
+		SOCKET clientSocket = (SOCKET)completionKey;
+
+		// 4. 정상적인 클라이언트 소켓인 경우만 처리
+		if (clientSocket != INVALID_SOCKET)
+		{
+			// 4.1 클라이언트 요청 처리
+			server->HandleClientRequest(clientSocket, overlapped);
+		}
+
+		// 5. Overlapped 구조체 메모리 해제
+		// 비동기 작업 상태를 저장하는 구조체 overlapped.
+		if (overlapped)
+		{
+			delete overlapped;
+		}
 	}
 
-	// 5. 리슨 소켓 닫기
-	::closesocket(hSocket);
-
-	// Winsock 해제
-	::WSACleanup();
 	return 0;
-
 	
 }
+

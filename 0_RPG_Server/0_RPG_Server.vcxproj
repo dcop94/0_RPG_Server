@@ -130,10 +130,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Database_Character.cpp" />
+    <ClCompile Include="Database_Login.cpp" />
+    <ClCompile Include="Database_Server.cpp" />
     <ClCompile Include="IOCP_Server.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Database_Character.h" />
+    <ClInclude Include="Database_Login.h" />
+    <ClInclude Include="Database_Server.h" />
     <ClInclude Include="IOCP_Server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
