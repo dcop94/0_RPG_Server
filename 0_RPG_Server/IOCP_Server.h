@@ -7,6 +7,10 @@
 #include <winsock.h>
 #include <vector>
 
+#include "Database_Server.h"
+#include "Database_Login.h"
+#include "Database_Character.h"
+
 #pragma comment (lib, "ws2_32.lib")
 
 using namespace std;

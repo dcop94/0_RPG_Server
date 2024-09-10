@@ -21,9 +21,27 @@
     <ClCompile Include="IOCP_Server.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Database_Server.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Database_Login.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Database_Character.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IOCP_Server.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Database_Server.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Database_Login.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Database_Character.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
