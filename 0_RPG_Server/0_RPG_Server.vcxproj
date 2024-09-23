@@ -130,17 +130,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Chat_Manager.cpp" />
+    <ClCompile Include="Client_Manager.cpp" />
     <ClCompile Include="Database_Character.cpp" />
     <ClCompile Include="Database_Login.cpp" />
     <ClCompile Include="Database_Server.cpp" />
     <ClCompile Include="IOCP_Server.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Network_Manager.cpp" />
+    <ClCompile Include="WorkerThread_Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Chat_Manager.h" />
+    <ClInclude Include="Client_Manager.h" />
     <ClInclude Include="Database_Character.h" />
     <ClInclude Include="Database_Login.h" />
     <ClInclude Include="Database_Server.h" />
     <ClInclude Include="IOCP_Server.h" />
+    <ClInclude Include="Network_Manager.h" />
+    <ClInclude Include="WorkerThread_Manager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -30,7 +30,6 @@ public:
 private:
 	// 고유 계정 코드 생성
 	string geneAccountCode();
-
 	Database_Server* dbserver; // DB 공통 연결
 
 };
