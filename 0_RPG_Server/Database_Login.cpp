@@ -182,3 +182,66 @@ string Database_login::geneAccountCode()
 
 	return ss.str();
 }
+
+string Database_login::findAccount(const string& accountCode)
+{
+	try
+	{
+		sql::PreparedStatement* pstmt = dbserver->getConnection()->prepareStatement(
+			"SELECT use_email FROM users WHERE account_code = ?"
+		);
+
+		pstmt->setString(1, accountCode);
+		sql::ResultSet* res = pstmt->executeQuery();
+
+		if (res->next())
+		{
+			string email = res->getString("use_email");
+			delete res;
+			delete pstmt;
+			return email;
+		}
+
+		delete res;
+		delete pstmt;
+		return "";
+	}
+	catch (sql::SQLException& e)
+	{
+		cerr << "ERROR : 계정 조회 실패" << e.what() << endl;
+		return "";
+	}
+}
+
+string Database_login::findPassword(const string& use_email, const string& accountCode)
+{
+	try
+	{
+		sql::PreparedStatement* pstmt = dbserver->getConnection()->prepareStatement(
+			"SELECT password FROM users WHERE use_email = ? AND account_code = ?"
+		);
+
+		pstmt->setString(1, use_email);
+		pstmt->setString(2, accountCode);
+		sql::ResultSet* res = pstmt->executeQuery();
+
+		if (res->next())
+		{
+			string password = res->getString("password");
+			delete res;
+			delete pstmt;
+			return password;
+		}
+
+		delete res;
+		delete pstmt;
+		return "";
+	}
+	catch (sql::SQLException& e)
+	{
+		cerr << "ERROR : 비밀번호 찾기 실패" << e.what() << endl;
+		return "";
+	}
+}
+
+

@@ -6,6 +6,8 @@
 #include <cppconn/driver.h>
 #include <string>
 #include <queue>
+#include <mutex>
+#include <condition_variable>
 
 
 using namespace std;
@@ -23,22 +25,26 @@ class Database_Server
 {	
 public:
 	// 생성자 : DB연결 정보 초기화
-	Database_Server(const Database_Info& db_info);
+	Database_Server(const Database_Info& db_info, int pool_size);
 
 	// 소멸자 : DB 연결 종료
 	~Database_Server();
 
 	sql::Connection* getConnection(); 
-	void db_disconnect(); // DB 연결 해제
+	void releaseConnection(sql::Connection* connection);
+	
 
 	
 
 private:
+	queue<sql::Connection*> pool;
 	sql::Driver* driver; // MySQL 드라이버
-	sql::Connection* connection; // MySQL 연결
-	bool db_connect(); // DB 연결
 	Database_Info db_info;
-
+	mutex pool_mutex;
+	condition_variable pool_cond;
+	void createConnection(int count);
+	bool isConnectionValid(sql::Connection* conn);
+	int max_pool_size;
 
 };
 

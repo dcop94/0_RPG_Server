@@ -30,6 +30,18 @@
     <ClCompile Include="Database_Character.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Chat_Manager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Network_Manager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Client_Manager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkerThread_Manager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IOCP_Server.h">
@@ -42,6 +54,18 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Database_Character.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Chat_Manager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Network_Manager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Client_Manager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkerThread_Manager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
