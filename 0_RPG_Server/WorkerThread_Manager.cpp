@@ -77,7 +77,7 @@ void WorkerThreadManager::HandleClientRequest(SOCKET clientSocket, OVERLAPPED* o
 		}
 		else if (receivedData.find("CHAR_INFO") == 0)
 		{
-			
+			HandleCharacterInfoRequest(clientSocket, recvBuffer + 9, recvSize - 9);
 		}
 
 	}
@@ -118,17 +118,17 @@ void WorkerThreadManager::HandleCharacterInfoRequest(SOCKET clientSocket, const 
 	string accountCode(data, dataSize);
 
 	// Database_Character에서 캐릭터 정보 가져오기
-	Database_character::CharacterInfo characterInfo;
+	CharacterData characterData;
 
-	if (dbCharacter->getCharacterInfo(accountCode, characterInfo))
+	if (dbCharacter->getCharacterInfo(accountCode, characterData))
 	{
 		// 캐릭터 정보를 가져옴
-		SendCharacterInfoResponse(clientSocket, true, "캐릭터 정보 조회 성공", characterInfo);
+		SendCharacterInfoResponse(clientSocket, true, "캐릭터 정보 조회 성공", characterData);
 	}
 	else
 	{
 		// 캐릭터 정보 가져오기 실패
-		SendCharacterInfoResponse(clientSocket, false, "캐릭터 정보 조회 실패", characterInfo);
+		SendCharacterInfoResponse(clientSocket, false, "캐릭터 정보 조회 실패", characterData);
 	}
 }
 
@@ -136,23 +136,23 @@ void WorkerThreadManager::SendLoginResponse(SOCKET clientSocket, bool success, c
 {
 	string response = success ? "SUCCES : " + message : "FAIL :" + message;
 	
-	send(clientSocket, response.c_str(), response.size(), 0);
+	send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
 }
 
-void WorkerThreadManager::SendCharacterInfoResponse(SOCKET clientSocket, bool success, const string& message, const Database_character::CharacterInfo& characterInfo)
+void WorkerThreadManager::SendCharacterInfoResponse(SOCKET clientSocket, bool success, const string& message, const CharacterData& characterData)
 {
 	string response;
 
 	if (success)
 	{
 		response = "SUCCESS :" + message + "\n";
-		response += "CharacterClass :" + characterInfo.Use_Char_Class + "\n";
-		response += "UseName :" + characterInfo.Use_Char_Name + "\n";
-		response += "MapLocation :" + characterInfo.Map_Location + "\n";
-		response += "LEVEL :" + to_string(characterInfo.Use_level) + "\n";
-		response += "EXP :" + to_string(characterInfo.Use_exp) + "\n";
-		response += "HP :" + to_string(characterInfo.Use_hp) + "\n";
-		response += "MP :" + to_string(characterInfo.Use_mp) + "\n";
+		response += "CharacterClass :" + characterData.Use_Char_Class + "\n";
+		response += "UseName :" + characterData.Use_Char_Name + "\n";
+		response += "MapLocation :" + to_string(characterData.positionX) + "," + to_string(characterData.positionY) + "\n";
+		response += "LEVEL :" + to_string(characterData.Use_level) + "\n";
+		response += "EXP :" + to_string(characterData.Use_exp) + "\n";
+		response += "HP :" + to_string(characterData.Use_hp) + "\n";
+		response += "MP :" + to_string(characterData.Use_mp) + "\n";
 
 	}
 	else
@@ -160,5 +160,5 @@ void WorkerThreadManager::SendCharacterInfoResponse(SOCKET clientSocket, bool su
 		response = "FAIL : " + message;
 	}
 
-	send(clientSocket, response.c_str(), response.size(), 0);
+	send(clientSocket, response.c_str(), static_cast<int>(response.size()), 0);
 }

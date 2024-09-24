@@ -4,33 +4,35 @@
 
 #include "Database_Server.h"
 
+struct CharacterData
+{
+	string accountCode = "";
+	string Use_Char_Class = "";
+	string Use_Char_Name = "";
+	float positionX = 0.0f;
+	float positionY = 0.0f;
+	int Use_level = 0;
+	double Use_exp = 0.0;
+	int Use_hp = 100;
+	int Use_mp = 100;
+};
+
 class Database_character
 {
 public:
 	Database_character(Database_Server* dbserver);
 
-	struct CharacterInfo
-	{
-		string Use_Char_Class;
-		string Use_Char_Name;
-		string Map_Location;
-		int Use_level;
-		double Use_exp;
-		int Use_hp;
-		int Use_mp;
-	};
-
 	// 캐릭터 생성 여부 확인
 	bool isCharacter(const string& accountCode);
 
 	// 캐릭터 생성
-	bool createCharacter(const string& accountCode, const string& charClass, const string& charName);
+	bool createCharacter(const CharacterData& charData);
 
 	// 캐릭터 정보 업데이트 (위치, 레벨, 경험치, 체력, 마나)
-	bool updateCharacterInfo(const string& accountCode, const string& mapLocation, int level, int exp, int hp, int mp);
+	bool updateCharacterInfo(const CharacterData& charData);
 
 	// 캐릭터 정보 가져오기
-	bool getCharacterInfo(const string& accountCode, CharacterInfo& characterInfo);
+	bool getCharacterInfo(const string& accountCode, CharacterData& charData);
 
 private:
 	// 고유 계정 코드 생성

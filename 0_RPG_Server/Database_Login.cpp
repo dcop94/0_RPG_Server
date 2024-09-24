@@ -49,6 +49,8 @@ bool Database_login::verifyLogin(const string& use_email_input, const string& pa
 	string use_email = use_email_input;
 	string password = password_input;
 
+	sql::Connection* conn = dbserver->getConnection();
+
 	try
 	{
 		while (true)
