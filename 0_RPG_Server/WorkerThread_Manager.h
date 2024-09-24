@@ -26,7 +26,7 @@ private:
 	void HandleCharacterInfoRequest(SOCKET clientSocket, const char* data, int dataSize);
 	
 	void SendLoginResponse(SOCKET clientSocket, bool success, const string& message);
-	void SendCharacterInfoResponse(SOCKET clientSocket, bool success, const string& message, const Database_character::CharacterInfo& characterInfo);
+	void SendCharacterInfoResponse(SOCKET clientSocket, bool success, const string& message, const CharacterData& characterData);
 
 };
 

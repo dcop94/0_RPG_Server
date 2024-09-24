@@ -34,17 +34,23 @@ bool Database_character::isCharacter(const string& accountCode)
 	}
 }
 
-bool Database_character::createCharacter(const string& accountCode, const string& charClass, const string& charName)
+bool Database_character::createCharacter(const CharacterData& charData)
 {
 	try
 	{
 		sql::PreparedStatement* pstmt = dbserver->getConnection()->prepareStatement(
-			"INSERT INTO use_characters (account_code, class, nickname, map_location, level, exp, hp, mp) VALUES(?, ?, ?, 'start_map', 1, 0, 50, 50) "
+			"INSERT INTO use_characters (account_code, class, nickname, map_location, level, exp, hp, mp)"
+			"VALUES(?, ?, ?, ?, ?, ?, ?, ?) "
 		);
-		pstmt->setString(1, accountCode);
-		pstmt->setString(2, charClass);
-		pstmt->setString(3, charName);
-		pstmt->execute();
+		pstmt->setString(1, charData.accountCode);
+		pstmt->setString(2, charData.Use_Char_Class);
+		pstmt->setString(3, charData.Use_Char_Name);
+		pstmt->setString(4, to_string(charData.positionX) + "," + to_string(charData.positionY));
+		pstmt->setInt(5, charData.Use_level);
+		pstmt->setDouble(6, charData.Use_exp);
+		pstmt->setInt(7, charData.Use_hp);
+		pstmt->setInt(8, charData.Use_mp);
+		pstmt->executeUpdate();
 
 		delete pstmt;
 		return true;
@@ -57,18 +63,19 @@ bool Database_character::createCharacter(const string& accountCode, const string
 	}
 }
 
-bool Database_character::updateCharacterInfo(const string& accountCode, const string& mapLocation, int level, int exp, int hp, int mp)
+bool Database_character::updateCharacterInfo(const CharacterData& charData)
 {
 	try
 	{
 		sql::PreparedStatement* pstmt = dbserver->getConnection()->prepareStatement(
 			"UPDATE use_characters SET map_location = ?, level = ?, exp = ?, hp = ?, mp = ? WHERE account_code = ?");
-		pstmt->setString(1, mapLocation);
-		pstmt->setInt(2, level);
-		pstmt->setDouble(3, exp);
-		pstmt->setInt(4, hp);
-		pstmt->setInt(5, mp);
-		pstmt->setString(6, accountCode);
+			
+		pstmt->setString(1, to_string(charData.positionX) + "," + to_string(charData.positionY));
+		pstmt->setInt(2, charData.Use_level);
+		pstmt->setDouble(3, charData.Use_exp);
+		pstmt->setInt(4, charData.Use_hp);
+		pstmt->setInt(5, charData.Use_mp);
+		pstmt->setString(6, charData.accountCode);
 		pstmt->executeUpdate();
 
 		delete pstmt;
@@ -81,34 +88,35 @@ bool Database_character::updateCharacterInfo(const string& accountCode, const st
 	}
 }
 
-bool Database_character::getCharacterInfo(const string& accountCode, CharacterInfo& characterInfo)
+bool Database_character::getCharacterInfo(const string& accountCode, CharacterData& charData)
 {
 	try
 	{
 		sql::PreparedStatement* pstmt = dbserver->getConnection()->prepareStatement(
-			"SELECT * FROM use_character WHERE account_code = ?");
+			"SELECT class, nickname, map_location, level, exp, hp, mp FROM use_characters WHERE account_code = ?");
 		pstmt->setString(1, accountCode);
 		sql::ResultSet* res = pstmt->executeQuery();
 
 		if (res->next())
 		{
 			// 캐릭터 정보 구조체 저장
-			characterInfo.Use_Char_Class = res->getString("class");
-			characterInfo.Use_Char_Name = res->getString("nickname");
-			characterInfo.Map_Location = res->getString("map_location");
-			characterInfo.Use_level = res->getInt("level");
-			characterInfo.Use_exp = res->getDouble("exp");
-			characterInfo.Use_hp = res->getInt("hp");
-			characterInfo.Use_mp = res->getInt("mp");
-		}
-		else
-		{
-			return false;
+			charData.Use_Char_Class = res->getString("class");
+			charData.Use_Char_Name = res->getString("nickname");
+			string mapLocation = res->getString("map_location");
+			sscanf_s(mapLocation.c_str(), "%f, %f", &charData.positionX, &charData.positionY);
+			charData.Use_level = res->getInt("level");
+			charData.Use_exp = res->getDouble("exp");
+			charData.Use_hp = res->getInt("hp");
+			charData.Use_mp = res->getInt("mp");
+
+			delete res;
+			delete pstmt;
+			return true;
 		}
 
 		delete res;
 		delete pstmt;
-		return true;
+		return false;
 	}
 	catch (sql::SQLException& e)
 	{

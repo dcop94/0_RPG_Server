@@ -1,6 +1,8 @@
 #include "Database_Server.h"
 #include <iostream>
 #include <cppconn/exception.h>
+#include <mysql_driver.h>
+#include <mysql_connection.h>
 
 
 // 예외처리 등 확인하기
@@ -11,7 +13,7 @@
 
 Database_Server::Database_Server(const Database_Info& db_info, int pool_size) : db_info(db_info), driver(nullptr), max_pool_size(pool_size)
 {
-	driver = get_driver_instance();
+	driver = sql::mysql::get_mysql_driver_instance();
 	createConnection(pool_size);
 }
 

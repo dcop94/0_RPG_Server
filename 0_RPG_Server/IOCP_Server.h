@@ -23,11 +23,12 @@ class IOCP_Server
 {
 public:
 	// 생성자 및 소멸자
-	IOCP_Server(); // 서버 인스턴스 초기화
+	IOCP_Server(Database_Server* dbServerPtr); // 서버 인스턴스 초기화
 	~IOCP_Server();
 
 	// 서버 (시작, 중단)
 	
+	bool Initialize_iocp();
 	void StartSvr(); // 클라이언트 연결 대기 및 수락
 	void StopSvr(); // 서버 중단 및 스레드, 소켓 등을 해제
 
@@ -40,6 +41,5 @@ private:
 	Database_login* dbLogin;
 	Database_character* dbCharacter;
 
-	bool Initialize_iocp();
 };
 #endif // !IOCP_SERVER_H
