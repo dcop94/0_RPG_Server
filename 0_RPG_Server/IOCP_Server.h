@@ -1,45 +1,51 @@
 #pragma once
-#ifndef IOCP_SERVER_H
-#define IOCP_SERVER_H
 
-#include <iostream>
-#include <WinSock2.h>
-#include <vector>
-#include <unordered_map>
-#include <mutex>
-
-#include "Client_Manager.h"
-#include "Network_Manager.h"
-#include "WorkerThread_Manager.h"
-#include "Database_Server.h"
-#include "Database_Login.h"
-#include "Database_Character.h"
-
-#pragma comment (lib, "ws2_32.lib")
-
-using namespace std;
+#include "stdfx.h"
+#include "DB_Manager.h"
+#include "Packet.h"
 
 class IOCP_Server
 {
 public:
-	// 생성자 및 소멸자
-	IOCP_Server(Database_Server* dbServerPtr); // 서버 인스턴스 초기화
-	~IOCP_Server();
+    static IOCP_Server& Instance();
 
-	// 서버 (시작, 중단)
-	
-	bool Initialize_iocp();
-	void StartSvr(); // 클라이언트 연결 대기 및 수락
-	void StopSvr(); // 서버 중단 및 스레드, 소켓 등을 해제
+    // 생성자 및 소멸자
+    IOCP_Server();
+    ~IOCP_Server();
+
+    bool Initialiize();
+    void Run();
+    void Shutdown();
+
+    void AcceptThread();
+    void WorkThread();
+
+    // 세션 리스트에 접근할 수 있는 Getter 함수 추가
+    SOCKET GetSessionSocket(int sessionID) const;
+
+    void CloseSession(int sessionID);
 
 private:
-	NetworkManager* networkManager;
-	ClientManager* clientManager;
-	WorkerThreadManager* workerThreadManager;
+    SOCKET m_Socket;
+    HANDLE m_hIOCP;
+    HANDLE m_AcceptThread;
+    HANDLE m_WorkThread[MAX_WORKTHREAD];
 
-	Database_Server* dbServer;
-	Database_login* dbLogin;
-	Database_character* dbCharacter;
+    std::vector<SOCKET> m_SessionList;
+    std::deque<int> m_SessionQueue;
+    mutable std::mutex m_SessionMutex;
 
+    bool InitSocket();
+    bool BindAndListen(int port);
+    bool CreateAcceptThread();
+    bool CreateWorkThread();
+    
+
+    // 복사 생성자와 할당 연산자를 삭제하여 싱글톤 보장
+    IOCP_Server(const IOCP_Server&) = delete;
+    IOCP_Server& operator=(const IOCP_Server&) = delete;
+    
 };
-#endif // !IOCP_SERVER_H
+
+unsigned int WINAPI CallAcceptThread(LPVOID p);
+unsigned int WINAPI CallWorkThread(LPVOID p);

@@ -1,28 +1,18 @@
 #pragma once
-#ifndef NETWORK_MANAGER_H
-#define NETWORK_MANAGER_H
+#include "stdfx.h"
 
-#include <WinSock2.h>
-#include <vector>
-#include <mutex>
-
-using namespace std;
-
-class NetworkManager
+class Network_Manager
 {
 public:
-	NetworkManager();
-	~NetworkManager();
+	static Network_Manager& Instance();
 
-	bool Initialize(); // 서버 시작하기 전 소켓과 IOCP 초기화
-	SOCKET AcceptClient();
-	void CloseSocket(SOCKET socket);
-	HANDLE GetIOCPHandle() const; 
+	Network_Manager();
+	~Network_Manager();
+
+	bool ConnectDB();
+	bool ConnectToServer();
+	void HandlePacket();
 
 private:
-	SOCKET listenSocket;
-	HANDLE iocpHandle;
-	mutex socketMutex;
+	SOCKET m_socket;
 };
-
-#endif // !NETWORK_MANAGER_H

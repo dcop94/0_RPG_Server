@@ -1,48 +1,29 @@
-#include <iostream>
+#include "stdfx.h"
 #include "IOCP_Server.h"
-#include "Database_Server.h"
-
-using namespace std;
-
-DWORD WINAPI WorkerThreadStart(LPVOID lpParam)
-{
-	WorkerThreadManager* workerThreadManager = static_cast<WorkerThreadManager*>(lpParam);
-	return workerThreadManager->WorkerThread(lpParam);
-}
 
 int main()
 {
-	Database_Info db_info = { "tcp://127.0.0.1:3306", "user", "1234","zrpg_db" };
-	int db_pool_size = 10;
-	
-	
-	Database_Server* dbServer = new Database_Server(db_info, db_pool_size);
+    // 랜덤 시드 초기화
+    srand(static_cast<unsigned int>(time(NULL)));
 
-	IOCP_Server* iocpServer = new IOCP_Server(dbServer);
+    IOCP_Server& iocpServer = IOCP_Server::Instance();
 
-	if (!iocpServer->Initialize_iocp())
-	{
-		cerr << "ERROR : IOCP 서버 초기화 실패" << endl;
-		return -1;
-	}
+    // DB 연결 상태 확인
+    if (!_DB_Manager.CheckDBConnection())
+    {
+        std::cerr << "[ERROR] DB 연결 확인 실패, 서버 종료" << std::endl;
+        return -1;  // DB 연결 실패 시 서버 종료
+    }
 
-	HANDLE workerThread = CreateThread(NULL, 0, WorkerThreadStart, iocpServer, 0, NULL);
+    if (!iocpServer.Initialiize())
+    {
+        std::cerr << "[ERROR] 서버 초기화 실패" << std::endl;
+        return -1;
+    }
 
-	if (workerThread == NULL)
-	{
-		cerr << "ERROR : 워커스레드 생성 실패" << endl;
-		iocpServer->StopSvr();
-		return -1;
-	}
+    std::cout << "[INFO] 서버 시작 중" << std::endl;
 
-	iocpServer->StartSvr();
+    iocpServer.Run();  // 클라이언트 수락 및 통신 시작
 
-	WaitForSingleObject(workerThread, INFINITE);
-
-	iocpServer->StopSvr();
-	delete iocpServer;
-	delete dbServer;
-	CloseHandle(workerThread);
-
-	return 0;
+    return 0;
 }
